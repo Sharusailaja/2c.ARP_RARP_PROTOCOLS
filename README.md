@@ -17,9 +17,103 @@ stored.
 5. Map the IP address with its MAC address and return the MAC address to client.
 P
 ## PROGRAM - ARP
+```
+SERVER:
+import socket
+
+s = socket.socket()
+s.bind(('localhost', 8000))
+s.listen(5)
+print("ARP Server is listening on port 8000...")
+c, addr = s.accept()
+
+address = {
+    "148.129.123.45": "5D:BC:E3:FA",
+    "109.178.123.45": "8A:2B:3C:4D",
+}
+
+while True:
+    ip = c.recv(1024).decode()
+    print(f"Received IP: {ip}")
+    mac = address.get(ip, "Not Found")
+    c.send(mac.encode())
+CLIENT:
+import socket
+
+s = socket.socket()
+s.connect(('localhost', 8000))
+
+while True:
+    ip = input("Enter Logical Address (IP): ")
+    s.send(ip.encode())
+    print("MAC Address:", s.recv(1024).decode())
+```
+
 ## OUPUT - ARP
+SERVER:
+
+<img width="470" height="107" alt="image" src="https://github.com/user-attachments/assets/9312244b-df7b-4c47-ae07-25f83d4c7320" />
+
+CLIENT:
+
+<img width="468" height="154" alt="image" src="https://github.com/user-attachments/assets/fe64454f-24ee-49f2-94b1-d57eba53fdf3" />
+
+
 ## PROGRAM - RARP
+```
+SERVER:
+import socket
+s = socket.socket()
+s.bind(('localhost', 8000))
+s.listen(5)
+print("Server is listening for RARP requests...")
+c, addr = s.accept()
+print(f"Connection established with {addr}")
+
+rarp_table = {
+    "6A:08:AA:C2": "165.165.80.80",
+    "8A:BC:E3:FA": "165.165.79.1"
+}
+
+while True:
+    mac = c.recv(1024).decode()
+
+    if not mac:  
+        break
+
+    try:
+        ip = rarp_table[mac]  
+        print(f"MAC: {mac} -> IP: {ip}")
+        c.send(ip.encode())  
+    except KeyError:
+        print(f"MAC: {mac} not found in RARP table.")
+        c.send("Not Found".encode())
+c.close()
+s.close()
+CLIENT:
+import socket
+c = socket.socket()
+c.connect(('localhost', 8000))
+
+while True:
+    mac = input("Enter MAC address to find IP (or type 'exit' to quit): ")
+    if mac.lower() == "exit":  
+        break
+    c.send(mac.encode())
+    ip = c.recv(1024).decode()
+    print(f"IP Address for {mac}: {ip}")
+c.close()
+```
 ## OUPUT -RARP
+SERVER:
+
+<img width="550" height="132" alt="image" src="https://github.com/user-attachments/assets/f728c59f-87fd-48d0-8f7e-d26495d3ca81" />
+
+CLIENT:
+
+<img width="797" height="160" alt="image" src="https://github.com/user-attachments/assets/14f248f4-aef3-4448-8556-b0e3f7b66d0c" />
+
+
 ## RESULT
 Thus, the python program for simulating ARP protocols using TCP was successfully 
 executed.
